@@ -4,9 +4,9 @@ use apalis_core::{
         codec::{Codec, json::JsonCodec},
     },
     features_table,
-    layers::Identity,
+    layers::Stack,
     task::Task,
-    worker::context::WorkerContext,
+    worker::{context::WorkerContext, ext::ack::AcknowledgeLayer},
 };
 use apalis_sql::config::Config;
 use futures::{
@@ -18,6 +18,7 @@ use surrealdb::{Surreal, engine::any::Any};
 use ulid::Ulid;
 
 use crate::{
+    ack::{LockTaskLayer, SurrealAck},
     fetcher::{SurrealFetcher, SurrealPollFetcher},
     queries::{
         keep_alive::{initial_heartbeat, keep_alive_stream},
@@ -26,6 +27,7 @@ use crate::{
     sink::SurrealSink,
 };
 
+mod ack;
 mod config;
 /// Fetcher module for retrieving tasks from surrealdb backend
 mod fetcher;
@@ -213,7 +215,7 @@ where
 
     type Beat = BoxStream<'static, Result<(), surrealdb::Error>>;
 
-    type Layer = Identity;
+    type Layer = Stack<LockTaskLayer, AcknowledgeLayer<SurrealAck>>;
 
     fn heartbeat(&self, worker: &WorkerContext) -> Self::Beat {
         let conn = self.conn.clone();
@@ -231,7 +233,9 @@ where
     }
 
     fn middleware(&self) -> Self::Layer {
-        Identity::new()
+        let lock = LockTaskLayer::new(self.conn.clone());
+        let ack = AcknowledgeLayer::new(SurrealAck::new(self.conn.clone()));
+        Stack::new(lock, ack)
     }
 
     fn poll(self, worker: &WorkerContext) -> Self::Stream {
