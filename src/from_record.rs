@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use surrealdb::RecordId;
 
 #[derive(Debug, Deserialize, Serialize)]
-pub(crate) struct RawSurTaskRec {
+pub(crate) struct RawSurrealTask {
     pub(crate) id: Option<RecordId>,
     #[serde(with = "serde_bytes")]
     pub(crate) job: Vec<u8>,
@@ -21,8 +21,8 @@ pub(crate) struct RawSurTaskRec {
     pub(crate) metadata: Option<String>,
 }
 
-impl From<RawSurTaskRec> for SurrealTaskRecord {
-    fn from(value: RawSurTaskRec) -> Self {
+impl From<RawSurrealTask> for SurrealTaskRecord {
+    fn from(value: RawSurrealTask) -> Self {
         Self {
             id: value.id.map(|id| id.key().to_string()),
             job: value.job,

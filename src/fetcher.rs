@@ -18,7 +18,7 @@ use ulid::Ulid;
 
 use crate::{
     CompactType, SurrealContext, SurrealTask,
-    from_record::{RawSurTaskRec, SurrealTaskRecord},
+    from_record::{RawSurrealTask, SurrealTaskRecord},
     query_file_as_str,
 };
 
@@ -41,7 +41,7 @@ pub(crate) async fn fetch_next(
         .bind(("v_job_count", buffer_size))
         .await?;
 
-    let tasks: Vec<RawSurTaskRec> = result.take(1)?;
+    let tasks: Vec<RawSurrealTask> = result.take(1)?;
 
     let tasks: Result<Vec<_>, _> = tasks
         .into_iter()

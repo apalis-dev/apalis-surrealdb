@@ -7,7 +7,7 @@ use ulid::Ulid;
 
 use crate::{
     CompactType, SurrealContext, SurrealStorage,
-    from_record::{RawSurTaskRec, SurrealTaskRecord},
+    from_record::{RawSurrealTask, SurrealTaskRecord},
     query_file_as_str,
 };
 
@@ -49,7 +49,7 @@ where
                 .bind(("offset", offset))
                 .await?;
 
-            let tasks: Option<Vec<RawSurTaskRec>> = res.take(0)?;
+            let tasks: Option<Vec<RawSurrealTask>> = res.take(0)?;
 
             let tasks = tasks
                 .map(|ts| {

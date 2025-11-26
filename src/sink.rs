@@ -11,7 +11,7 @@ use surrealdb::RecordId;
 use surrealdb::{Surreal, engine::any::Any};
 use ulid::Ulid;
 
-use crate::from_record::RawSurTaskRec;
+use crate::from_record::RawSurrealTask;
 use crate::{CompactType, SurrealStorage, SurrealTask};
 
 type FlushFuture = BoxFuture<'static, Result<(), Arc<surrealdb::Error>>>;
@@ -45,7 +45,7 @@ pub(crate) async fn push_tasks(
     cfg: Config,
     buffer: Vec<SurrealTask<CompactType>>,
 ) -> Result<(), Arc<surrealdb::Error>> {
-    let tasks: Vec<RawSurTaskRec> = buffer
+    let tasks: Vec<RawSurrealTask> = buffer
         .into_iter()
         .map(|t| {
             let id = t
@@ -62,7 +62,7 @@ pub(crate) async fn push_tasks(
             let job_type = cfg.queue().to_string();
             let metadata = serde_json::to_string(&t.parts.ctx.meta()).unwrap_or_default();
 
-            RawSurTaskRec {
+            RawSurrealTask {
                 id: Some(RecordId::from_table_key("jobs", id)),
                 job: args,
                 job_type: Some(job_type),
@@ -80,7 +80,7 @@ pub(crate) async fn push_tasks(
         })
         .collect();
 
-    let _: Vec<RawSurTaskRec> = conn.insert("jobs").content(tasks).await?;
+    let _: Vec<RawSurrealTask> = conn.insert("jobs").content(tasks).await?;
 
     Ok(())
 }

@@ -3,7 +3,7 @@ use apalis_core::task::{Task, task_id::TaskId};
 use apalis_sql::from_row::{FromRowError, TaskRow};
 use ulid::Ulid;
 
-use crate::from_record::{RawSurTaskRec, SurrealTaskRecord};
+use crate::from_record::{RawSurrealTask, SurrealTaskRecord};
 use crate::{CompactType, SurrealContext, SurrealStorage, query_file_as_str};
 
 impl<Args, D, F> FetchById<Args> for SurrealStorage<Args, D, F>
@@ -30,7 +30,7 @@ where
             let query = query_file_as_str("queries/backend/find_by_id.surql").map_err(|e| *e)?;
             let mut res = conn.query(query).bind(("task_id", task_id)).await?;
 
-            let res: Option<RawSurTaskRec> = res.take(0)?;
+            let res: Option<RawSurrealTask> = res.take(0)?;
 
             let task = res
                 .map(|r| {
