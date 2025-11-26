@@ -65,26 +65,6 @@ pub(crate) struct SurrealTaskRecord {
     pub(crate) metadata: Option<String>,
 }
 
-// impl From<SurrealTaskRecord> for RawSurTaskRec {
-//     fn from(value: SurrealTaskRecord) -> Self {
-//         Self {
-//             id: (),
-//             job: s,
-//             job_type: (),
-//             status: (),
-//             attempts: (),
-//             max_attempts: (),
-//             run_at: (),
-//             last_result: (),
-//             lock_at: (),
-//             lock_by: (),
-//             done_at: (),
-//             priority: (),
-//             metadata: (),
-//         }
-//     }
-// }
-
 impl TryFrom<SurrealTaskRecord> for TaskRow {
     type Error = surrealdb::Error;
     fn try_from(value: SurrealTaskRecord) -> Result<Self, Self::Error> {
