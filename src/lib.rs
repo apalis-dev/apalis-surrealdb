@@ -112,43 +112,9 @@ pub fn query_file_as_str(path: &str) -> Result<String, Box<surrealdb::Error>> {
 impl SurrealStorage<(), (), ()> {
     /// Perform necessary setup
     pub async fn setup(conn: &Surreal<Any>) -> Result<(), surrealdb::Error> {
+        let query = query_file_as_str("migrations/init_setup.surql").map_err(|e| *e)?;
         conn.use_ns("apalis").use_db("apalis").await?;
-        conn.query(
-            "
-            DEFINE NAMESPACE IF NOT EXISTS apalis; 
-            DEFINE DATABASE IF NOT EXISTS apalis;
-            USE NAMESPACE apalis DATABASE apalis; 
-
-            -- Workers Table
-            DEFINE TABLE IF NOT EXISTS workers SCHEMAFULL;
-            -- Workers Fields
-            DEFINE FIELD IF NOT EXISTS id            ON workers TYPE string;
-            DEFINE FIELD IF NOT EXISTS worker_type   ON workers TYPE string; 
-            DEFINE FIELD IF NOT EXISTS storage_name  ON workers TYPE string;
-            DEFINE FIELD IF NOT EXISTS layers        ON workers TYPE string;
-            DEFINE FIELD IF NOT EXISTS started_at    ON workers TYPE int;
-            DEFINE FIELD IF NOT EXISTS last_seen     ON workers TYPE int DEFAULT time::unix();
-
-            -- Jobs Table
-            DEFINE TABLE IF NOT EXISTS jobs SCHEMAFULL;
-            -- Jobs Fields
-            DEFINE FIELD IF NOT EXISTS job          ON jobs TYPE bytes;
-            DEFINE FIELD IF NOT EXISTS id           ON jobs TYPE string;
-            DEFINE FIELD IF NOT EXISTS job_type     ON jobs TYPE string;
-            DEFINE FIELD IF NOT EXISTS status       ON jobs TYPE string DEFAULT 'Pending';
-            DEFINE FIELD IF NOT EXISTS attempts     ON jobs TYPE int DEFAULT 0;
-            DEFINE FIELD IF NOT EXISTS max_attempts ON jobs TYPE int DEFAULT 25;
-            DEFINE FIELD IF NOT EXISTS run_at       ON jobs TYPE int DEFAULT time::unix();
-            DEFINE FIELD IF NOT EXISTS last_result  ON jobs TYPE option<string>;
-            DEFINE FIELD IF NOT EXISTS lock_at      ON jobs TYPE option<int>;
-            DEFINE FIELD IF NOT EXISTS lock_by      ON jobs TYPE option<record<workers>>;
-            DEFINE FIELD IF NOT EXISTS done_at      ON jobs TYPE option<int>;
-            DEFINE FIELD IF NOT EXISTS priority     ON jobs TYPE int DEFAULT 0;
-            DEFINE FIELD IF NOT EXISTS metadata     ON jobs TYPE option<string>;
-        ",
-        )
-        .await?
-        .check()?;
+        conn.query(query).await?.check()?;
         Ok(())
     }
 }
