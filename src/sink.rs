@@ -40,7 +40,7 @@ impl<Args, Compact, Codec> Clone for SurrealSink<Args, Compact, Codec> {
 }
 
 /// Push a batch of tasks into the database
-pub(crate) async fn push_tasks(
+pub async fn push_tasks(
     conn: Surreal<Any>,
     cfg: Config,
     buffer: Vec<SurrealTask<CompactType>>,
