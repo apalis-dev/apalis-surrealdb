@@ -47,20 +47,20 @@ pub async fn push_tasks(
 ) -> Result<(), Arc<surrealdb::Error>> {
     let tasks: Vec<RawSurrealTask> = buffer
         .into_iter()
-        .map(|t| {
-            let id = t
+        .map(|task| {
+            let id = task
                 .parts
                 .task_id
                 .map(|id| id.to_string())
                 .unwrap_or(Ulid::new().to_string());
-            let run_at = t.parts.run_at as i64;
-            let max_attempts = t.parts.ctx.max_attempts();
-            let priority = t.parts.ctx.priority();
-            let args = t.args;
+            let run_at = task.parts.run_at as i64;
+            let max_attempts = task.parts.ctx.max_attempts();
+            let priority = task.parts.ctx.priority();
+            let args = task.args;
 
             // Using specified queue if specified, otherwise use default
             let job_type = cfg.queue().to_string();
-            let metadata = serde_json::to_string(&t.parts.ctx.meta()).unwrap_or_default();
+            let metadata = serde_json::Value::Object(task.parts.ctx.meta().clone());
 
             RawSurrealTask {
                 id: Some(RecordId::from_table_key("jobs", id)),

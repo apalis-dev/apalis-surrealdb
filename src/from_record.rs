@@ -18,7 +18,7 @@ pub(crate) struct RawSurrealTask {
     pub(crate) lock_by: Option<RecordId>,
     pub(crate) done_at: Option<i64>,
     pub(crate) priority: Option<i32>,
-    pub(crate) metadata: Option<String>,
+    pub(crate) metadata: Option<serde_json::Value>,
 }
 
 impl From<RawSurrealTask> for SurrealTaskRecord {
@@ -62,7 +62,7 @@ pub(crate) struct SurrealTaskRecord {
     pub(crate) lock_by: Option<String>,
     pub(crate) done_at: Option<i64>,
     pub(crate) priority: Option<i32>,
-    pub(crate) metadata: Option<String>,
+    pub(crate) metadata: Option<serde_json::Value>,
 }
 
 impl TryFrom<SurrealTaskRecord> for TaskRow {
@@ -127,9 +127,7 @@ impl TryFrom<SurrealTaskRecord> for TaskRow {
                     .unwrap()
             }),
             priority: value.priority.map(|p| p as usize),
-            metadata: value
-                .metadata
-                .map(|meta| serde_json::from_str(&meta).unwrap_or(serde_json::Value::Null)),
+            metadata: value.metadata,
         })
     }
 }
