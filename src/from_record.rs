@@ -1,13 +1,12 @@
 use apalis_sql::from_row::TaskRow;
 use chrono::{TimeZone, Utc};
 use serde::{Deserialize, Serialize};
-use surrealdb::RecordId;
+use surrealdb::{RecordId, sql::Bytes};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub(crate) struct RawSurrealTask {
     pub(crate) id: Option<RecordId>,
-    #[serde(with = "serde_bytes")]
-    pub(crate) job: Vec<u8>,
+    pub(crate) job: Bytes,
     pub(crate) job_type: Option<String>,
     pub(crate) status: Option<String>,
     pub(crate) attempts: Option<i32>,
@@ -25,7 +24,7 @@ impl From<RawSurrealTask> for SurrealTaskRecord {
     fn from(value: RawSurrealTask) -> Self {
         Self {
             id: value.id.map(|id| id.key().to_string()),
-            job: value.job,
+            job: value.job.into(),
             job_type: value.job_type,
             status: value.status,
             attempts: value.attempts,
@@ -50,7 +49,6 @@ impl From<RawSurrealTask> for SurrealTaskRecord {
 /// and scheduling information
 pub(crate) struct SurrealTaskRecord {
     pub(crate) id: Option<String>,
-    #[serde(with = "serde_bytes")]
     pub(crate) job: Vec<u8>,
     pub(crate) job_type: Option<String>,
     pub(crate) status: Option<String>,

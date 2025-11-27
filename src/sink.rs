@@ -7,8 +7,7 @@ use futures::{
     Sink,
     future::{BoxFuture, Shared},
 };
-use surrealdb::RecordId;
-use surrealdb::{Surreal, engine::any::Any};
+use surrealdb::{RecordId, Surreal, engine::any::Any, sql::Bytes};
 use ulid::Ulid;
 
 use crate::from_record::RawSurrealTask;
@@ -64,7 +63,7 @@ pub async fn push_tasks(
 
             RawSurrealTask {
                 id: Some(RecordId::from_table_key("jobs", id)),
-                job: args,
+                job: Bytes::from(args),
                 job_type: Some(job_type),
                 status: Some("Pending".into()),
                 attempts: Some(0),

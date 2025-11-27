@@ -11,7 +11,6 @@ futures = "0.3.30"
 log = "0.4.21"
 pin-project = "1.1.10"
 serde = { version = "1.0", features = ["derive"] }
-serde_bytes = "0.11.19"
 serde_json = "1.0.145"
 surrealdb = "2.4.0"
 ulid = { version = "1", features = ["serde"] }
