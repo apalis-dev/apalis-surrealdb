@@ -305,8 +305,6 @@ mod tests {
 
     use crate::SurrealStorage;
 
-    use surrealdb::opt::auth::Root;
-
     #[tokio::test]
     async fn basic_worker() {
         const ITEMS: usize = 10;
@@ -354,13 +352,7 @@ mod tests {
                 Err::<(), BoxDynError>("Intentional Error".into())
             });
 
-        let db = connect("ws://localhost:5439").await.unwrap();
-        db.signin(Root {
-            username: "main",
-            password: "main123",
-        })
-        .await
-        .unwrap();
+        let db = connect("mem://").await.unwrap();
 
         SurrealStorage::setup(&db).await.unwrap();
 
