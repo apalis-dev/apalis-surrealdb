@@ -1,7 +1,14 @@
 [package]
-name = "apalis-surreal"
+name = "apalis-surrealdb"
 version = "0.1.0"
+readme = "README.md"
 edition = "2024"
+repository = "https://github.com/apalis-dev/apalis-surrealdb"
+license = "MIT"
+description = "Background task processing for rust using apalis and surrealdb"
+keywords = ["apalis", "background-jobs", "task-queue", "surrealdb", "async"]
+categories = ["asynchronous", "database", "network-programming"]
+publish = true
 
 [dependencies]
 apalis-core = { version = "1.0.0-beta.1", features = ["sleep"] }
