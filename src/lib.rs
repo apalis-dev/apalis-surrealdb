@@ -30,7 +30,6 @@ pub type CompactType = Vec<u8>;
     WebUI => supported("Expose a web interface for monitoring tasks", true),
     FetchById => supported("Allow fetching a task by its ID", false),
     RegisterWorker => supported("Allow registering a worker with the backend", false),
-    MakeShared => supported("Share one connection across multiple workers via [`SharedSurrealStorage`]", false),
     WaitForCompletion => supported("Wait for tasks to complete without blocking", true),
     ResumeById => supported("Resume a task by its ID", false),
     ResumeAbandoned => supported("Resume abandoned tasks", false),
