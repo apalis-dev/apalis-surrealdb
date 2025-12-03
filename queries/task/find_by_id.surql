@@ -1,1 +1,0 @@
-SELECT * FROM jobs:$task_id;
