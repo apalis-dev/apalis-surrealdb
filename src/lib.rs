@@ -1,50 +1,35 @@
-use mq::JobProcessor;
-use std::{marker::PhantomData, time::Duration};
-use time::OffsetDateTime;
+use apalis_core::task::Task;
+use apalis_sql::config::Config;
 
-use apalis_core::{
-    layers::Identity,
-    poller::{stream::BackendStream, Poller},
-    request::{Request, RequestStream},
-    worker::WorkerId,
-    Backend, Codec,
-};
-use futures::{channel::mpsc::channel, StreamExt};
+use std::marker::PhantomData;
+use surrealdb::{Surreal, engine::any::Any};
+use ulid::Ulid;
 
-pub struct SurrealStorage<T> {
-    consumer: mq_surreal::SurrealJobProcessor,
-    producer: mq_surreal::SurrealProducer,
-    _t: PhantomData<T>,
+pub type SurrealContext = apalis_sql::context::SqlContext;
+
+/// Type alias for a task stored in sqlite backend
+pub type SurrealTask<Args> = Task<Args, SurrealContext, Ulid>;
+
+/// CompactType is the type used for compact serialization in sqlite backend
+pub type CompactType = Vec<u8>;
+
+#[pin_project::pin_project]
+pub struct SurrealStorage<T, C, Fetcher> {
+    conn: Surreal<Any>,
+    job_type: PhantomData<T>,
+    codec: PhantomData<C>,
+    config: Config,
+    #[pin]
+    fetcher: Fetcher,
 }
 
-pub struct SurrealContext {
-    kind: String,
-    created_at: Option<OffsetDateTime>,
-    updated_at: Option<OffsetDateTime>,
-    scheduled_at: Option<OffsetDateTime>,
-    // error_reason: Option<Value>,
-    attempts: u16,
-    max_attempts: u16,
-    lease_time: Duration,
-    priority: u8,
-    unique_key: Option<String>,
-}
-
-
-
-impl<T: Send + 'static + Sync, Res> Backend<Request<T, ()>, Res> for SurrealStorage<T> {
-    type Stream = BackendStream<RequestStream<Request<T, ()>>>;
-
-    type Layer = Identity;
-
-    fn poll<Svc>(self, _worker: WorkerId) -> Poller<Self::Stream> {
-        let (rx, tx) = channel(10);
-        let stream = tx.boxed();
-        let heartbeat = async {
-            let next = self.consumer.poll_next_job(&["queue"]).await;
-            if let Ok(Some(task)) = next {}
-        };
-
-        Poller::new(stream, heartbeat)
+impl<T, C, F> std::fmt::Debug for SurrealStorage<T, C, F> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("SurrealStorage")
+            .field("conn", &self.conn)
+            .field("job_type", &self.job_type)
+            .field("codec", &std::any::type_name::<C>())
+            .field("config", &self.config)
+            .finish()
     }
 }

@@ -1,0 +1,10 @@
+[advisories]
+ignore = [
+    # TODO(realonbebeto): track https://github.com/surrealdb/surrealdb/issues/5634
+    "RUSTSEC-2024-0436",
+    "RUSTSEC-2023-0089",
+]
+
+[output]
+quiet = false
+deny = ["warnings"]

@@ -1,10 +1,56 @@
 [package]
-name = "apalis-surreal"
+name = "apalis-surrealdb"
 version = "0.1.0"
-edition = "2021"
+readme = "README.md"
+edition = "2024"
+repository = "https://github.com/apalis-dev/apalis-surrealdb"
+license = "MIT"
+description = "Background task processing for rust using apalis and surrealdb"
+keywords = ["apalis", "background-jobs", "task-queue", "surrealdb", "async"]
+categories = ["asynchronous", "database", "network-programming"]
+publish = true
 
 [dependencies]
-apalis-core = "0.6.0-rc.7"
-futures = "0.3"
-mq = "0.10"
-mq-surreal = "0.10"
+apalis-core = { version = "1.0.0-beta.1", features = ["sleep"] }
+apalis-sql = { version = "1.0.0-beta.1", default-features = false }
+chrono = { version = "0.4", features = ["serde"] }
+futures = "0.3.30"
+log = "0.4.21"
+pin-project = "1.1.10"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0.145"
+surrealdb = "2.4.0"
+ulid = { version = "1", features = ["serde"] }
+
+
+[dev-dependencies]
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+futures-util = "0.3.31"
+surrealdb = { version = "2.4.0", features = ["kv-mem"] }
+
+
+[package.metadata.docs.rs]
+#defines the configuration attribute `docsrs`
+rustdoc-args = ["--cfg", "docsrs"]
+all-features = true
+
+
+[lints.rust]
+unsafe_code = "forbid"
+rust_2018_idioms = { level = "warn", priority = -1 }
+missing_debug_implementations = "warn"
+unreachable_pub = "warn"
+
+[lints.clippy]
+type_complexity = "allow"
+manual_let_else = "warn"
+match_same_arms = "warn"
+match_wildcard_for_single_variants = "warn"
+mem_forget = "warn"
+must_use_candidate = "warn"
+needless_borrow = "warn"
+needless_continue = "warn"
+needless_pass_by_ref_mut = "warn"
+needless_pass_by_value = "warn"
+option_option = "warn"
+redundant_clone = "warn"
