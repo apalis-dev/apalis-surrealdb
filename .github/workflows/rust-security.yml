@@ -44,13 +44,6 @@ jobs:
       - name: Audit dependencies
         run: cargo audit
 
-      - name: Install cargo-outdated
-        uses: taiki-e/install-action@cargo-outdated
-
-      - name: Check for outdated dependencies
-        run: cargo outdated --exit-code 1
-        continue-on-error: true
-
   unused-deps:
     name: Unused Dependencies
     runs-on: ubuntu-latest
