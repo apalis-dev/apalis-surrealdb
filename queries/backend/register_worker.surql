@@ -9,10 +9,10 @@ LET $new_worker = {
     };
 
 -- Get existing worker
-LET $existing = (SELECT * FROM workers:<$worker_id>);
+LET $existing = (SELECT * FROM $worker_id);
 
-IF !$existing OR !$existing.last_seen OR (time::unix() - $existing.last_seen) >= $keep_alive {
-    LET $updated = UPSERT workers:<worker_id> CONTENT $new_worker RETURN AFTER;
+IF !$existing OR !$existing.last_seen OR (time::unix() - $existing.last_seen[0]) >= $keep_alive {
+    LET $updated = UPSERT $worker_id CONTENT $new_worker RETURN AFTER;
 
     RETURN count($updated);
 }

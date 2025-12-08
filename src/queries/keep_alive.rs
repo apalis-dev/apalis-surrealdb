@@ -18,6 +18,8 @@ pub async fn keep_alive(
     let worker_id = worker.name().to_owned();
     let queue = config.queue().to_string();
 
+    dbg!(&worker_id, &queue);
+
     let query = query_file_as_str("queries/backend/keep_alive.surql").map_err(|e| *e)?;
 
     let mut res = conn

@@ -1,7 +1,7 @@
 use apalis_core::worker::context::WorkerContext;
 use apalis_sql::config::Config;
 use std::io;
-use surrealdb::{Surreal, engine::any::Any};
+use surrealdb::{RecordId, Surreal, engine::any::Any};
 
 use crate::query_file_as_str;
 
@@ -12,7 +12,8 @@ pub async fn register_worker(
     worker: WorkerContext,
     storage_type: &str,
 ) -> Result<(), surrealdb::Error> {
-    let worker_id = worker.name().to_owned();
+    let worker_id = RecordId::from_table_key("workers", worker.name().to_owned());
+
     let queue = config.queue().to_string();
     let layers = worker.get_service().to_owned();
     let keep_alive = config.keep_alive().as_secs() as i64;

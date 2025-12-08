@@ -24,9 +24,11 @@ ulid = { version = "1", features = ["serde"] }
 
 
 [dev-dependencies]
-tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+apalis = { version = "1.0.0-beta.2" }
+apalis-workflow = { version = "0.1.0-beta.1" }
 futures-util = "0.3.31"
 surrealdb = { version = "2.4.0", features = ["kv-mem"] }
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
 
 
 [package.metadata.docs.rs]

@@ -245,3 +245,77 @@ impl<Args, Decode: Send + 'static, F> SurrealStorage<Args, Decode, F> {
         ))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use std::time::Duration;
+
+    use apalis::prelude::*;
+    use apalis_sql::config::Config;
+    use chrono::Local;
+    use futures::{StreamExt, stream};
+
+    // For an in memory database
+    use surrealdb::engine::any::connect;
+
+    use crate::{SurrealContext, SurrealStorage};
+
+    #[tokio::test]
+    async fn basic_worker() {
+        const ITEMS: usize = 10;
+        let db = connect("mem://").await.unwrap();
+
+        SurrealStorage::setup(&db).await.unwrap();
+
+        let config = Config::new("basic-worker-queue");
+
+        let backend = SurrealStorage::new_with_config(&db, &config).await.unwrap();
+
+        let worker_context = WorkerContext::new::<fn(usize, WorkerContext)>("rango-tango-1");
+
+        crate::queries::keep_alive::initial_heartbeat(
+            db.clone(),
+            config.clone(),
+            worker_context.clone(),
+            "SurrealStorage",
+        )
+        .await
+        .unwrap();
+
+        tokio::spawn(async move {
+            tokio::time::sleep(Duration::from_secs(2)).await;
+            let mut start = 0;
+            let items = stream::repeat_with(move || {
+                start += 1;
+                Task::builder(serde_json::to_vec(&start).unwrap())
+                    .with_ctx(SurrealContext::new().with_priority(start))
+                    .build()
+            })
+            .take(ITEMS)
+            .collect::<Vec<_>>()
+            .await;
+
+            crate::sink::push_tasks(db.clone(), config, items)
+                .await
+                .unwrap();
+        });
+
+        println!("Start worker at {}", Local::now());
+
+        async fn send_reminder(item: usize, wrk: WorkerContext) -> Result<(), BoxDynError> {
+            if ITEMS == item {
+                wrk.stop().unwrap();
+            }
+            Ok(())
+        }
+
+        let worker = WorkerBuilder::new("rango-tango-1")
+            .backend(backend)
+            .build(send_reminder);
+
+        worker
+            .run_with_ctx(&mut worker_context.clone())
+            .await
+            .unwrap();
+    }
+}
