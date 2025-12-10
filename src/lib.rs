@@ -248,8 +248,6 @@ impl<Args, Decode: Send + 'static, F> SurrealStorage<Args, Decode, F> {
 
 #[cfg(test)]
 mod tests {
-    use std::time::Duration;
-
     use apalis::prelude::*;
     use apalis_sql::config::Config;
     use chrono::Local;
@@ -282,23 +280,20 @@ mod tests {
         .await
         .unwrap();
 
-        tokio::spawn(async move {
-            tokio::time::sleep(Duration::from_secs(2)).await;
-            let mut start = 0;
-            let items = stream::repeat_with(move || {
-                start += 1;
-                Task::builder(serde_json::to_vec(&start).unwrap())
-                    .with_ctx(SurrealContext::new().with_priority(start))
-                    .build()
-            })
-            .take(ITEMS)
-            .collect::<Vec<_>>()
-            .await;
+        let mut start = 0;
+        let items = stream::repeat_with(move || {
+            start += 1;
+            Task::builder(serde_json::to_vec(&start).unwrap())
+                .with_ctx(SurrealContext::new().with_priority(start))
+                .build()
+        })
+        .take(ITEMS)
+        .collect::<Vec<_>>()
+        .await;
 
-            crate::sink::push_tasks(db.clone(), config, items)
-                .await
-                .unwrap();
-        });
+        crate::sink::push_tasks(db.clone(), config, items)
+            .await
+            .unwrap();
 
         println!("Start worker at {}", Local::now());
 
