@@ -693,11 +693,11 @@ version = "2.1.1"
 criteria = "safe-to-deploy"
 
 [[exemptions.icu_properties]]
-version = "2.1.1"
+version = "2.1.2"
 criteria = "safe-to-deploy"
 
 [[exemptions.icu_properties_data]]
-version = "2.1.1"
+version = "2.1.2"
 criteria = "safe-to-deploy"
 
 [[exemptions.icu_provider]]
